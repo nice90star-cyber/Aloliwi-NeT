@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>العليوي نت للمحاسبة — إدارة مشتركي ميكروتك</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cairo', 'Inter', 'system-ui', 'sans-serif'],
+            num: ['Inter', 'Cairo', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#2563eb',
+              600: '#1d4ed8',
+              700: '#1e40af',
+              900: '#0f172a'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', 'Inter', system-ui, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .num-font {
+      font-family: 'Inter', 'Cairo', sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+    }
+    .nav-item-active {
+      color: #1d4ed8;
+      background-color: #eff6ff;
+    }
+    @media (max-width: 767px) {
+      .nav-item-active {
+        background-color: transparent;
+        color: #1d4ed8;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20 md:pb-6">
+
+  <!-- Top App Header -->
+  <header class="sticky top-0 z-30 bg-slate-900 text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center shrink-0 shadow-inner">
+          <i data-lucide="router" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-base md:text-lg font-extrabold tracking-tight truncate">العليوي نت للمحاسبة</h1>
+          <div class="flex items-center gap-2 text-xs text-slate-300">
+            <span class="inline-flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>MikroTik RouterOS v7</span>
+            </span>
+            <span class="hidden sm:inline text-slate-500">|</span>
+            <span id="header-active-month" class="hidden sm:inline num-font text-blue-300 font-semibold">الشهر: 2026-11</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-quick-sync" onclick="switchTab('mikrotik')" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold transition shadow-sm">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">سحب ميكروتك</span>
+        </button>
+        <button id="btn-quick-add" onclick="openAddSubscriberModal()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold transition shadow-sm">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">مشترك جديد</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Desktop Navigation Bar -->
+    <nav class="hidden md:block bg-slate-800/90 border-t border-slate-700/80">
+      <div class="max-w-7xl mx-auto px-4 flex items-center gap-2 py-1.5">
+        <button data-tab="dashboard" onclick="switchTab('dashboard')" class="desktop-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700/70 transition inline-flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i> الإحصائيات الشهرية
+        </button>
+        <button data-tab="subscribers" onclick="switchTab('subscribers')" class="desktop-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700/70 transition inline-flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4"></i> المشتركون والتحكم
+        </button>
+        <button data-tab="payments" onclick="switchTab('payments')" class="desktop-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700/70 transition inline-flex items-center gap-2">
+          <i data-lucide="wallet" class="w-4 h-4"></i> الدفعات والشهور المستقبلية
+        </button>
+        <button data-tab="mikrotik" onclick="switchTab('mikrotik')" class="desktop-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700/70 transition inline-flex items-center gap-2">
+          <i data-lucide="server" class="w-4 h-4"></i> ربط ميكروتك والباقات
+        </button>
+        <button data-tab="accounting" onclick="switchTab('accounting')" class="desktop-tab px-4 py-2 rounded-lg text-sm font-bold text-slate-300 hover:text-white hover:bg-slate-700/70 transition inline-flex items-center gap-2">
+          <i data-lucide="calculator" class="w-4 h-4"></i> المحاسبة والنسخ الاحتياطي
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-4 pt-4 space-y-5">
+
+    <!-- ==================== TAB 1: DASHBOARD & MONTHLY STATS ==================== -->
+    <section id="tab-dashboard" class="tab-panel space-y-4">
+      <!-- Month Switcher Bar -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-extrabold text-slate-800">الإحصائيات الشهرية والأداء المالي</h2>
+          <p class="text-xs text-slate-500">اختر الشهر لمراجعة التحصيل والدفعات المخصصة والدفعات المستقبلية</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+          <button onclick="shiftSelectedMonth(-1)" class="p-2 rounded-lg hover:bg-white text-slate-700 transition" title="الشهر السابق">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+          <input id="dashboard-month-picker" type="month" value="2026-11" onchange="onMonthPickerChange(this.value)" class="bg-transparent text-sm font-bold text-slate-800 num-font px-2 focus:outline-none cursor-pointer">
+          <button onclick="shiftSelectedMonth(1)" class="p-2 rounded-lg hover:bg-white text-slate-700 transition" title="الشهر التالي">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">محصّل الشهر المحدد</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="banknote" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div id="kpi-month-collected" class="text-xl sm:text-2xl font-extrabold text-emerald-700 num-font">$0</div>
+          <div id="kpi-month-collected-sub" class="text-[11px] text-slate-500 mt-1">0 دفعة مخصصة لهذا الشهر</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">إجمالي الذمم (عليه)</span>
+            <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+              <i data-lucide="trending-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div id="kpi-total-debt" class="text-xl sm:text-2xl font-extrabold text-rose-600 num-font">$0</div>
+          <div id="kpi-debt-count" class="text-[11px] text-slate-500 mt-1">0 مشترك عليه ذمة</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">رصيد مسبق / مستقبلي (له)</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div id="kpi-total-credit" class="text-xl sm:text-2xl font-extrabold text-blue-700 num-font">$0</div>
+          <div id="kpi-future-count" class="text-[11px] text-slate-500 mt-1">0 دفعة مستقبلية مجدولة</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500">حالة المشتركين</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <i data-lucide="wifi" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div id="kpi-active-subs" class="text-xl sm:text-2xl font-extrabold text-slate-800 num-font">0 / 0</div>
+          <div id="kpi-subs-sub" class="text-[11px] text-slate-500 mt-1">فعّال / موقوف في ميكروتك</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800">التدفق المالي الشهري وتوزيع الدفعات المستقبلية</h3>
+              <p class="text-xs text-slate-500">يوضح الدفعات العادية مقابل الدفعات المضافة لشهور مستقبلية (مثل 12 و 1)</p>
+            </div>
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700">6 أشهر</span>
+          </div>
+          <div class="relative h-64">
+            <canvas id="monthlyRevenueChart"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+          <div class="mb-3">
+            <h3 class="text-sm font-extrabold text-slate-800">توزيع المشتركين حسب الباقة</h3>
+            <p class="text-xs text-slate-500">حسابات PPPoE المسحوبة من ميكروتك</p>
+          </div>
+          <div class="relative h-64">
+            <canvas id="profileDistChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Future Payments Highlight -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold text-slate-800">الدفعات المجدولة للشهور المستقبلية</h3>
+              <p class="text-xs text-slate-500">تُضاف تلقائياً عند التجديد لأكثر من شهر مستقبلاً</p>
+            </div>
+          </div>
+          <button onclick="switchTab('payments'); setPaymentFilter('future');" class="text-xs font-bold text-blue-600 hover:underline">عرض الكل</button>
+        </div>
+        <div id="dashboard-future-summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: SUBSCRIBERS & CONTROL ==================== -->
+    <section id="tab-subscribers" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+        <div class="flex flex-col sm:flex-row gap-2.5">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2"></i>
+            <input id="sub-search-input" type="text" oninput="renderSubscribers()" placeholder="ابحث باسم المشترك، حساب PPPoE، أو رقم الهاتف..." class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <select id="sub-profile-filter" onchange="renderSubscribers()" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="all">كل الباقات</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+          <button data-sfilter="all" onclick="setSubFilter('all')" class="sub-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white whitespace-nowrap transition">الكل</button>
+          <button data-sfilter="active" onclick="setSubFilter('active')" class="sub-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">فعّال</button>
+          <button data-sfilter="disabled" onclick="setSubFilter('disabled')" class="sub-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">موقوف</button>
+          <button data-sfilter="debt" onclick="setSubFilter('debt')" class="sub-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">عليه ذمة (مدين)</button>
+          <button data-sfilter="credit" onclick="setSubFilter('credit')" class="sub-filter-btn px-3 py-1.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">له رصيد مسبق</button>
+        </div>
+      </div>
+
+      <div id="subscribers-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
+    </section>
+
+    <!-- ==================== TAB 3: PAYMENTS & FUTURE MONTHS ==================== -->
+    <section id="tab-payments" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <button data-pfilter="all" onclick="setPaymentFilter('all')" class="pay-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white whitespace-nowrap transition">جميع الحركات</button>
+          <button data-pfilter="future" onclick="setPaymentFilter('future')" class="pay-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">الدفعات المستقبلية المجدولة</button>
+          <button data-pfilter="credit" onclick="setPaymentFilter('credit')" class="pay-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">مقبوضات (له)</button>
+          <button data-pfilter="debit" onclick="setPaymentFilter('debit')" class="pay-filter-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 whitespace-nowrap transition">مستحقات وذمم (عليه)</button>
+        </div>
+        <button onclick="exportPaymentsCSV()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold transition">
+          <i data-lucide="download" class="w-4 h-4"></i> تصدير CSV
+        </button>
+      </div>
+
+      <!-- Future Months Grouped View -->
+      <div id="future-months-panel" class="hidden space-y-3"></div>
+
+      <!-- Ledger Table -->
+      <div id="payments-table-panel" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500">
+              <tr>
+                <th class="py-3 px-4 font-bold">التاريخ</th>
+                <th class="py-3 px-4 font-bold">المشترك</th>
+                <th class="py-3 px-4 font-bold">الشهر المخصص</th>
+                <th class="py-3 px-4 font-bold">البيان / النوع</th>
+                <th class="py-3 px-4 font-bold">له (مدفوع)</th>
+                <th class="py-3 px-4 font-bold">عليه (مستحق)</th>
+              </tr>
+            </thead>
+            <tbody id="payments-tbody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: MIKROTIK SYNC & PROFILES ==================== -->
+    <section id="tab-mikrotik" class="tab-panel hidden space-y-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- RouterOS v7 Connection Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <i data-lucide="server" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h2 class="text-base font-extrabold text-slate-800">إعدادات سحب الحسابات من ميكروتك</h2>
+                <p class="text-xs text-slate-500">يدعم RouterOS v7 REST API (/rest/ppp/secret)</p>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700">جاهز للمزامنة</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">عنوان السيرفر (IP / Domain)</label>
+              <input id="mk-host" type="text" value="192.168.88.1" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">المنفذ (REST API Port)</label>
+              <input id="mk-port" type="number" value="443" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">اسم المستخدم (API User)</label>
+              <input id="mk-user" type="text" value="admin" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور</label>
+              <input id="mk-pass" type="password" value="••••••••" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-xs text-amber-800 leading-relaxed">
+            <strong>ملاحظة الاتصال المباشر:</strong> الاتصال المباشر بعناوين الشبكة المحلية (مثل 192.168.88.1) يعمل داخل نسخة الأندرويد (APK) على شبكتك المحلية. هنا يمكنك اختبار السحب الفوري عبر <strong>محاكاة RouterOS v7</strong> أو لصق ملف تصدير <code>/ppp secret export</code> الحقيقي أدناه.
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button onclick="simulateMikrotikPull()" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition shadow-sm">
+              <i data-lucide="download-cloud" class="w-4 h-4"></i> سحب الحسابات من ميكروتك (محاكاة)
+            </button>
+            <button onclick="saveMikrotikSettings()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition">
+              حفظ الإعدادات
+            </button>
+          </div>
+          <div id="sync-log-box" class="hidden p-3 rounded-xl bg-slate-900 text-emerald-400 text-xs num-font leading-relaxed max-h-36 overflow-y-auto" dir="ltr"></div>
+        </div>
+
+        <!-- Real MikroTik .rsc / Export Parser -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="terminal" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">استيراد مباشر من تصدير ميكروتك (.rsc)</h2>
+              <p class="text-xs text-slate-500">الصق مخرجات أمر <code class="num-font bg-slate-100 px-1 rounded">/ppp secret export</code> لاستيراد حساباتك الحقيقية</p>
+            </div>
+          </div>
+          <textarea id="rsc-import-text" rows="5" dir="ltr" placeholder='add name="ali_net" password="123" profile="8M-Plus" comment="علي الأحمد - 0933112233"&#10;add name="sami_home" password="456" profile="16M-Turbo" comment="سامي العلي"' class="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs num-font focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+          <button onclick="importFromMikrotikRSC()" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition">
+            <i data-lucide="file-input" class="w-4 h-4"></i> تحليل واستيراد الحسابات الآن
+          </button>
+        </div>
+      </div>
+
+      <!-- PPPoE Profiles Pricing Table -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-800">باقات ميكروتك (PPPoE Profiles) والأسعار الشهرية</h3>
+            <p class="text-xs text-slate-500">يتم اعتماد سعر الباقة تلقائياً عند التجديد لشهر أو عدة شهور مستقبلية</p>
+          </div>
+          <button onclick="openAddProfileModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> إضافة باقة
+          </button>
+        </div>
+        <div id="profiles-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: ACCOUNTING & BACKUP ==================== -->
+    <section id="tab-accounting" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+        <h2 class="text-base font-extrabold text-slate-800">ملخص الصندوق والميزانية المحاسبية الشاملة</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200/70">
+            <div class="text-xs font-bold text-emerald-700">إجمالي المقبوضات النقدية (الصندوق)</div>
+            <div id="acc-total-cash" class="text-2xl font-extrabold text-emerald-800 num-font mt-1">$0</div>
+          </div>
+          <div class="p-4 rounded-xl bg-rose-50 border border-rose-200/70">
+            <div class="text-xs font-bold text-rose-700">إجمالي الديون المستحقة (عليه)</div>
+            <div id="acc-total-receivables" class="text-2xl font-extrabold text-rose-800 num-font mt-1">$0</div>
+          </div>
+          <div class="p-4 rounded-xl bg-blue-50 border border-blue-200/70">
+            <div class="text-xs font-bold text-blue-700">إجمالي الدفعات المستقبلية (له)</div>
+            <div id="acc-total-deferred" class="text-2xl font-extrabold text-blue-800 num-font mt-1">$0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+        <h3 class="text-base font-extrabold text-slate-800">النسخ الاحتياطي وتصدير البيانات</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button onclick="exportFullBackupJSON()" class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition">
+            <i data-lucide="hard-drive-download" class="w-4 h-4"></i> تنزيل نسخة احتياطية (JSON)
+          </button>
+          <label class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold transition cursor-pointer">
+            <i data-lucide="hard-drive-upload" class="w-4 h-4"></i> استعادة نسخة احتياطية
+            <input id="backup-file-input" type="file" accept=".json" onchange="importFullBackupJSON(event)" class="hidden">
+          </label>
+          <button onclick="openResetConfirmModal()" class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-sm font-bold transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i> إعادة ضبط البيانات التجريبية
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar (APK Style) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-white border-t border-slate-200 shadow-lg">
+    <div class="grid grid-cols-5 py-1.5">
+      <button data-tab="dashboard" onclick="switchTab('dashboard')" class="mobile-tab flex flex-col items-center justify-center py-1 text-slate-500 transition">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-0.5">الإحصائيات</span>
+      </button>
+      <button data-tab="subscribers" onclick="switchTab('subscribers')" class="mobile-tab flex flex-col items-center justify-center py-1 text-slate-500 transition">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-0.5">المشتركون</span>
+      </button>
+      <button data-tab="payments" onclick="switchTab('payments')" class="mobile-tab flex flex-col items-center justify-center py-1 text-slate-500 transition">
+        <i data-lucide="wallet" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-0.5">الدفعات</span>
+      </button>
+      <button data-tab="mikrotik" onclick="switchTab('mikrotik')" class="mobile-tab flex flex-col items-center justify-center py-1 text-slate-500 transition">
+        <i data-lucide="server" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-0.5">ميكروتك</span>
+      </button>
+      <button data-tab="accounting" onclick="switchTab('accounting')" class="mobile-tab flex flex-col items-center justify-center py-1 text-slate-500 transition">
+        <i data-lucide="calculator" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-0.5">المحاسبة</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL 1: MULTI-MONTH FUTURE RENEWAL ==================== -->
+  <div id="modal-renew" class="fixed inset-0 z-50 hidden items-center justify-center p-3 modal-backdrop">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold">تجديد الاشتراك وتوزيع الشهور المستقبلية</h3>
+          <p id="renew-sub-title" class="text-xs text-blue-300 mt-0.5"></p>
+        </div>
+        <button onclick="closeModal('modal-renew')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <input id="renew-sub-id" type="hidden">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">الشهر الحالي / المرجعي</label>
+            <input id="renew-base-month" type="month" value="2026-11" onchange="updateRenewPreview()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">الباقة وسعر الشهر</label>
+            <select id="renew-profile-select" onchange="updateRenewPreview()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+          </div>
+        </div>
+
+        <!-- Renewal Mode -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-600">بداية احتساب الشهور المجددة</label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+              <input type="radio" name="renew-start-mode" value="future" checked onchange="updateRenewPreview()" class="accent-blue-600">
+              <span class="text-xs font-bold text-slate-700">شهور مستقبلية تالية (بعد الشهر المرجعي)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 cursor-pointer has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+              <input type="radio" name="renew-start-mode" value="include" onchange="updateRenewPreview()" class="accent-blue-600">
+              <span class="text-xs font-bold text-slate-700">شامل الشهر المرجعي نفسه</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Number of Months -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-600">عدد الشهور المطلوب تجديدها</label>
+            <input id="renew-months-count" type="number" min="1" max="24" value="2" oninput="updateRenewPreview()" class="w-20 px-2.5 py-1 rounded-lg border border-slate-200 text-center text-sm font-extrabold num-font">
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="setRenewMonths(1)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-xs font-bold text-slate-700">شهر واحد</button>
+            <button type="button" onclick="setRenewMonths(2)" class="px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-xs font-bold text-blue-800">شهران (مستقبلاً)</button>
+            <button type="button" onclick="setRenewMonths(3)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-xs font-bold text-slate-700">3 شهور</button>
+            <button type="button" onclick="setRenewMonths(6)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-xs font-bold text-slate-700">6 شهور</button>
+            <button type="button" onclick="setRenewMonths(12)" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-100 text-xs font-bold text-slate-700">سنة (12)</button>
+          </div>
+        </div>
+
+        <!-- Live Generated Months Breakdown -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-600">
+            <span>الدفعات الشهرية التي ستُضاف تلقائياً:</span>
+            <span id="renew-total-badge" class="text-blue-700 num-font text-sm font-extrabold">$0</span>
+          </div>
+          <div id="renew-months-preview" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Paid Now (Supports Full, Partial, or On-Credit) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">المبلغ المدفوع الآن ($)</label>
+            <input id="renew-paid-amount" type="number" min="0" step="0.5" oninput="updateRenewDiffNote()" class="w-full px-3 py-2 rounded-xl border border-emerald-300 bg-emerald-50/50 text-sm font-extrabold num-font text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ملاحظة الدفعة</label>
+            <input id="renew-note" type="text" placeholder="مثلاً: دفع نقدي مسبق" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+        <div id="renew-diff-note" class="text-xs font-bold text-slate-600"></div>
+      </div>
+
+      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+        <button onclick="closeModal('modal-renew')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-100">إلغاء</button>
+        <button onclick="confirmRenewal()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-sm">تأكيد التجديد وإضافة الدفعات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: LEDGER & PAYMENT (له / عليه) ==================== -->
+  <div id="modal-ledger" class="fixed inset-0 z-50 hidden items-center justify-center p-3 modal-backdrop">
+    <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-extrabold">كشف الحساب والدفعات (له / عليه)</h3>
+          <p id="ledger-sub-title" class="text-xs text-slate-300 mt-0.5"></p>
+        </div>
+        <button onclick="closeModal('modal-ledger')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <input id="ledger-sub-id" type="hidden">
+
+        <!-- Balance Summary Strip -->
+        <div id="ledger-balance-strip" class="p-3.5 rounded-xl flex items-center justify-between"></div>
+
+        <!-- Quick Transaction Form -->
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+          <div class="text-xs font-extrabold text-slate-700">تسجيل حركة مالية سريعة</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <select id="ledger-tx-type" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700">
+              <option value="credit">قبض دفعة / له (+)</option>
+              <option value="debit">تسجيل دين / عليه (-)</option>
+            </select>
+            <input id="ledger-tx-amount" type="number" min="0.5" step="0.5" placeholder="المبلغ ($)" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-sm font-bold num-font">
+            <input id="ledger-tx-month" type="month" value="2026-11" class="px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold num-font">
+          </div>
+          <div class="flex gap-2">
+            <input id="ledger-tx-note" type="text" placeholder="البيان (مثلاً: سداد ذمة سابقة، رسوم راوتر...)" class="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs">
+            <button onclick="submitQuickLedgerTx()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">تسجيل</button>
+          </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-100 text-slate-600">
+              <tr>
+                <th class="py-2.5 px-3 font-bold">التاريخ</th>
+                <th class="py-2.5 px-3 font-bold">الشهر</th>
+                <th class="py-2.5 px-3 font-bold">البيان</th>
+                <th class="py-2.5 px-3 font-bold">له</th>
+                <th class="py-2.5 px-3 font-bold">عليه</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-history-tbody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: ADD / EDIT SUBSCRIBER ==================== -->
+  <div id="modal-subscriber" class="fixed inset-0 z-50 hidden items-center justify-center p-3 modal-backdrop">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+        <h3 id="sub-modal-heading" class="text-base font-extrabold">إضافة مشترك جديد</h3>
+        <button onclick="closeModal('modal-subscriber')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3">
+        <input id="edit-sub-id" type="hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">اسم المشترك الكامل</label>
+          <input id="edit-sub-name" type="text" placeholder="مثلاً: أحمد العلي" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">حساب PPPoE</label>
+            <input id="edit-sub-user" type="text" dir="ltr" placeholder="ahmad_8m" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">رقم الهاتف (واتساب)</label>
+            <input id="edit-sub-phone" type="text" dir="ltr" placeholder="0933000000" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">الباقة (Profile)</label>
+            <select id="edit-sub-profile" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm font-bold"></select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">ينتهي في شهر</label>
+            <input id="edit-sub-expiry" type="month" value="2026-11" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+        <button id="btn-delete-sub" onclick="deleteEditingSubscriber()" class="hidden px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-bold">حذف المشترك</button>
+        <div class="flex items-center gap-2 mr-auto">
+          <button onclick="closeModal('modal-subscriber')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold">إلغاء</button>
+          <button onclick="saveSubscriberForm()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold">حفظ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: ADD PROFILE ==================== -->
+  <div id="modal-profile" class="fixed inset-0 z-50 hidden items-center justify-center p-3 modal-backdrop">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+        <h3 class="text-base font-extrabold">إضافة باقة PPPoE جديدة</h3>
+        <button onclick="closeModal('modal-profile')" class="p-1.5 rounded-lg hover:bg-slate-700 text-slate-300">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">اسم الباقة في ميكروتك</label>
+          <input id="new-prof-name" type="text" dir="ltr" placeholder="20M-Pro" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">السرعة (Rate Limit)</label>
+          <input id="new-prof-speed" type="text" dir="ltr" placeholder="20M/20M" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">السعر الشهري ($)</label>
+          <input id="new-prof-price" type="number" min="1" step="0.5" placeholder="22" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm num-font">
+        </div>
+      </div>
+      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="closeModal('modal-profile')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold">إلغاء</button>
+        <button onclick="saveNewProfile()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold">حفظ الباقة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 5: RESET CONFIRM ==================== -->
+  <div id="modal-reset" class="fixed inset-0 z-50 hidden items-center justify-center p-3 modal-backdrop">
+    <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+      <div class="p-5 space-y-3 text-center">
+        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-base font-extrabold text-slate-800">إعادة ضبط البيانات؟</h3>
+        <p class="text-xs text-slate-500">سيتم استرجاع البيانات التجريبية الافتراضية وحذف التعديلات المحلية الحالية.</p>
+        <div class="flex justify-center gap-2 pt-2">
+          <button onclick="closeModal('modal-reset')" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">إلغاء</button>
+          <button onclick="confirmResetDemoData()" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-sm font-bold">نعم، إعادة ضبط</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="fixed top-20 left-4 z-50 space-y-2 pointer-events-none"></div>
+
+  <script>
+    const STORAGE_KEY = 'alolowi_mikrotik_pro_v1';
+    const CURRENT_SYSTEM_MONTH = '2026-11';
+
+    const ARABIC_MONTHS = {
+      '01': 'كانون الثاني (1)',
+      '02': 'شباط (2)',
+      '03': 'آذار (3)',
+      '04': 'نيسان (4)',
+      '05': 'أيار (5)',
+      '06': 'حزيران (6)',
+      '07': 'تموز (7)',
+      '08': 'آب (8)',
+      '09': 'أيلول (9)',
+      '10': 'تشرين الأول (10)',
+      '11': 'تشرين الثاني (11)',
+      '12': 'كانون الأول (12)'
+    };
+
+    function getDefaultState() {
+      return {
+        selectedMonth: CURRENT_SYSTEM_MONTH,
+        subFilter: 'all',
+        payFilter: 'all',
+        mikrotik: {
+          host: '192.168.88.1',
+          port: 443,
+          user: 'admin'
+        },
+        profiles: [
+          { name: '4M-Home', speed: '4M/4M', price: 10 },
+          { name: '8M-Plus', speed: '8M/8M', price: 15 },
+          { name: '16M-Turbo', speed: '16M/16M', price: 25 },
+          { name: '30M-Fiber', speed: '30M/30M', price: 40 }
+        ],
+        subscribers: [
+          { id: 's1', name: 'محمد الأحمد', username: 'mohammad_8m', phone: '0933112201', profile: '8M-Plus', enabled: true, online: true, expiryMonth: '2027-01', balance: 30 },
+          { id: 's2', name: 'خالد العلي', username: 'khaled_16m', phone: '0944223302', profile: '16M-Turbo', enabled: true, online: true, expiryMonth: '2026-11', balance: -10 },
+          { id: 's3', name: 'سارة المحمود', username: 'sara_4m', phone: '0955334403', profile: '4M-Home', enabled: true, online: true, expiryMonth: '2026-11', balance: 0 },
+          { id: 's4', name: 'عمر الحسن', username: 'omar_8m', phone: '0966445504', profile: '8M-Plus', enabled: false, online: false, expiryMonth: '2026-10', balance: -15 },
+          { id: 's5', name: 'يوسف الإبراهيم', username: 'yousef_30m', phone: '0988556605', profile: '30M-Fiber', enabled: true, online: true, expiryMonth: '2026-12', balance: 40 },
+          { id: 's6', name: 'طارق الناصر', username: 'tarek_16m', phone: '0932667706', profile: '16M-Turbo', enabled: true, online: false, expiryMonth: '2026-11', balance: -25 }
+        ],
+        transactions: [
+          { id: 't1', subId: 's1', date: '2026-11-02', forMonth: '2026-11', type: 'credit', amount: 15, isFuture: false, note: 'تجديد اشتراك شهر 11' },
+          { id: 't2', subId: 's1', date: '2026-11-25', forMonth: '2026-12', type: 'credit', amount: 15, isFuture: true, note: 'تجديد مستقبلي — دفعة عن شهر 12 / 2026' },
+          { id: 't3', subId: 's1', date: '2026-11-25', forMonth: '2027-01', type: 'credit', amount: 15, isFuture: true, note: 'تجديد مستقبلي — دفعة عن شهر 1 / 2027' },
+          { id: 't4', subId: 's2', date: '2026-11-04', forMonth: '2026-11', type: 'credit', amount: 15, isFuture: false, note: 'دفعة جزئية عن شهر 11' },
+          { id: 't5', subId: 's2', date: '2026-11-04', forMonth: '2026-11', type: 'debit', amount: 10, isFuture: false, note: 'متبقي ذمة اشتراك شهر 11 (عليه)' },
+          { id: 't6', subId: 's3', date: '2026-11-05', forMonth: '2026-11', type: 'credit', amount: 10, isFuture: false, note: 'تجديد اشتراك شهر 11' },
+          { id: 't7', subId: 's4', date: '2026-11-01', forMonth: '2026-11', type: 'debit', amount: 15, isFuture: false, note: 'ذمة مستحقة — الحساب موقوف' },
+          { id: 't8', subId: 's5', date: '2026-11-10', forMonth: '2026-11', type: 'credit', amount: 40, isFuture: false, note: 'تجديد باقة 30M لشهر 11' },
+          { id: 't9', subId: 's5', date: '2026-11-10', forMonth: '2026-12', type: 'credit', amount: 40, isFuture: true, note: 'تجديد مستقبلي — دفعة عن شهر 12 / 2026' },
+          { id: 't10', subId: 's6', date: '2026-11-12', forMonth: '2026-11', type: 'debit', amount: 25, isFuture: false, note: 'تجديد آجل لشهر 11 (عليه)' }
+        ]
+      };
+    }
+
+    let state = loadState();
+    let revenueChart = null;
+    let profileChart = null;
+    let activeTab = 'dashboard';
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.subscribers) && Array.isArray(parsed.transactions)) {
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      return getDefaultState();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    // ---- Date & Month Utilities ----
+    function addMonths(ym, delta) {
+      const parts = ym.split('-').map(Number);
+      const d = new Date(parts[0], parts[1] - 1 + delta, 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+
+    function formatMonthArabic(ym) {
+      if (!ym || !ym.includes('-')) return ym || '-';
+      const [y, m] = ym.split('-');
+      return `${ARABIC_MONTHS[m] || m} ${y}`;
+    }
+
+    function formatMonthShort(ym) {
+      if (!ym || !ym.includes('-')) return ym || '-';
+      const [y, m] = ym.split('-');
+      return `شهر ${parseInt(m, 10)} / ${y}`;
+    }
+
+    function getProfilePrice(profileName) {
+      const p = state.profiles.find(x => x.name === profileName);
+      return p ? Number(p.price) : 15;
+    }
+
+    function formatMoney(v) {
+      const num = Number(v) || 0;
+      return '$' + (Number.isInteger(num) ? num : num.toFixed(2));
+    }
+
+    function getTodayISO() {
+      return '2026-11-25';
+    }
+
+    // ---- Toast & Modals ----
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const colors = type === 'error'
+        ? 'bg-rose-600 text-white'
+        : type === 'info'
+          ? 'bg-slate-800 text-white'
+          : 'bg-emerald-600 text-white';
+      el.className = `${colors} px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold flex items-center gap-2 transition transform`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    function openModal(id) {
+      const m = document.getElementById(id);
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+    }
+
+    function closeModal(id) {
+      const m = document.getElementById(id);
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+
+    // ---- Navigation ----
+    function switchTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      const panel = document.getElementById('tab-' + tab);
+      if (panel) panel.classList.remove('hidden');
+
+      document.querySelectorAll('.desktop-tab').forEach(btn => {
+        const isAct = btn.dataset.tab === tab;
+        btn.classList.toggle('bg-blue-600', isAct);
+        btn.classList.toggle('text-white', isAct);
+        btn.classList.toggle('text-slate-300', !isAct);
+      });
+      document.querySelectorAll('.mobile-tab').forEach(btn => {
+        const isAct = btn.dataset.tab === tab;
+        btn.classList.toggle('text-blue-600', isAct);
+        btn.classList.toggle('text-slate-500', !isAct);
+      });
+
+      renderAll();
+    }
+
+    // ---- Dashboard & Charts ----
+    function shiftSelectedMonth(delta) {
+      state.selectedMonth = addMonths(state.selectedMonth, delta);
+      document.getElementById('dashboard-month-picker').value = state.selectedMonth;
+      saveState();
+      renderDashboard();
+    }
+
+    function onMonthPickerChange(val) {
+      if (!val) return;
+      state.selectedMonth = val;
+      saveState();
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const sel = state.selectedMonth;
+      document.getElementById('dashboard-month-picker').value = sel;
+      document.getElementById('header-active-month').textContent = 'الشهر: ' + sel;
+
+      const monthCredits = state.transactions.filter(t => t.forMonth === sel && t.type === 'credit');
+      const monthCollected = monthCredits.reduce((s, t) => s + Number(t.amount), 0);
+      const monthFuturePortion = monthCredits.filter(t => t.isFuture).reduce((s, t) => s + Number(t.amount), 0);
+
+      const totalDebt = state.subscribers.filter(s => s.balance < 0).reduce((acc, s) => acc + Math.abs(s.balance), 0);
+      const debtCount = state.subscribers.filter(s => s.balance < 0).length;
+
+      const totalCredit = state.subscribers.filter(s => s.balance > 0).reduce((acc, s) => acc + s.balance, 0);
+      const futureTxs = state.transactions.filter(t => t.type === 'credit' && t.forMonth > CURRENT_SYSTEM_MONTH);
+
+      const activeSubs = state.subscribers.filter(s => s.enabled).length;
+      const disabledSubs = state.subscribers.length - activeSubs;
+
+      document.getElementById('kpi-month-collected').textContent = formatMoney(monthCollected);
+      document.getElementById('kpi-month-collected-sub').textContent =
+        `${monthCredits.length} دفعة (منها ${formatMoney(monthFuturePortion)} مجدولة مسبقاً)`;
+
+      document.getElementById('kpi-total-debt').textContent = formatMoney(totalDebt);
+      document.getElementById('kpi-debt-count').textContent = `${debtCount} مشترك عليه ذمة مالية`;
+
+      document.getElementById('kpi-total-credit').textContent = formatMoney(totalCredit);
+      document.getElementById('kpi-future-count').textContent = `${futureTxs.length} دفعة مستقبلية مضافة`;
+
+      document.getElementById('kpi-active-subs').textContent = `${activeSubs} / ${state.subscribers.length}`;
+      document.getElementById('kpi-subs-sub').textContent = `${activeSubs} فعّال • ${disabledSubs} موقوف`;
+
+      renderFutureSummaryCards();
+      renderCharts();
+    }
+
+    function renderFutureSummaryCards() {
+      const container = document.getElementById('dashboard-future-summary');
+      const futureMap = {};
+      state.transactions
+        .filter(t => t.type === 'credit' && t.forMonth > CURRENT_SYSTEM_MONTH)
+        .forEach(t => {
+          if (!futureMap[t.forMonth]) futureMap[t.forMonth] = { count: 0, total: 0 };
+          futureMap[t.forMonth].count += 1;
+          futureMap[t.forMonth].total += Number(t.amount);
+        });
+
+      const months = Object.keys(futureMap).sort();
+      if (!months.length) {
+        container.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-400">لا توجد دفعات مستقبلية مجدولة بعد. جرب تجديد مشترك لشهرين مستقبلاً!</div>`;
+        return;
+      }
+
+      container.innerHTML = months.map(m => `
+        <div class="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 flex items-center justify-between">
+          <div>
+            <div class="text-xs font-extrabold text-amber-900">${formatMonthShort(m)}</div>
+            <div class="text-[11px] text-amber-700 mt-0.5">${futureMap[m].count} دفعة مستقبلية</div>
+          </div>
+          <div class="text-lg font-extrabold text-emerald-700 num-font">${formatMoney(futureMap[m].total)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderCharts() {
+      const monthsWindow = [];
+      for (let i = -1; i <= 4; i++) {
+        monthsWindow.push(addMonths(state.selectedMonth, i));
+      }
+
+      const regularData = monthsWindow.map(m =>
+        state.transactions
+          .filter(t => t.forMonth === m && t.type === 'credit' && !t.isFuture)
+          .reduce((s, t) => s + Number(t.amount), 0)
+      );
+      const futureData = monthsWindow.map(m =>
+        state.transactions
+          .filter(t => t.forMonth === m && t.type === 'credit' && t.isFuture)
+          .reduce((s, t) => s + Number(t.amount), 0)
+      );
+      const labels = monthsWindow.map(m => formatMonthShort(m));
+
+      const ctx1 = document.getElementById('monthlyRevenueChart');
+      if (ctx1) {
+        if (revenueChart) revenueChart.destroy();
+        revenueChart = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'تحصيل عادي ($)', data: regularData, backgroundColor: '#2563eb', borderRadius: 6 },
+              { label: 'دفعات مستقبلية مضافة ($)', data: futureData, backgroundColor: '#10b981', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 11 } } }
+            },
+            scales: {
+              x: { stacked: true, grid: { display: false }, ticks: { font: { family: 'Cairo', size: 11 } } },
+              y: { stacked: true, beginAtZero: true, ticks: { callback: v => '$' + v } }
+            }
+          }
+        });
+      }
+
+      const profCounts = state.profiles.map(p => state.subscribers.filter(s => s.profile === p.name).length);
+      const ctx2 = document.getElementById('profileDistChart');
+      if (ctx2) {
+        if (profileChart) profileChart.destroy();
+        profileChart = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: state.profiles.map(p => `${p.name} ($${p.price})`),
+            datasets: [{
+              data: profCounts,
+              backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: { position: 'bottom', labels: { font: { family: 'Cairo', size: 11 } } }
+            }
+          }
+        });
+      }
+    }
+
+    // ---- Subscribers Rendering & Control ----
+    function setSubFilter(f) {
+      state.subFilter = f;
+      document.querySelectorAll('.sub-filter-btn').forEach(btn => {
+        const isAct = btn.dataset.sfilter === f;
+        btn.classList.toggle('bg-slate-900', isAct);
+        btn.classList.toggle('text-white', isAct);
+        btn.classList.toggle('bg-slate-100', !isAct);
+        btn.classList.toggle('text-slate-700', !isAct);
+      });
+      renderSubscribers();
+    }
+
+    function populateProfileDropdowns() {
+      const filterEl = document.getElementById('sub-profile-filter');
+      const curFilter = filterEl.value;
+      filterEl.innerHTML = '<option value="all">كل الباقات</option>' +
+        state.profiles.map(p => `<option value="${p.name}">${p.name} ($${p.price})</option>`).join('');
+      if (curFilter) filterEl.value = curFilter;
+
+      const opts = state.profiles.map(p => `<option value="${p.name}">${p.name} — $${p.price}/شهر (${p.speed})</option>`).join('');
+      document.getElementById('renew-profile-select').innerHTML = opts;
+      document.getElementById('edit-sub-profile').innerHTML = opts;
+    }
+
+    function renderSubscribers() {
+      const q = (document.getElementById('sub-search-input').value || '').trim().toLowerCase();
+      const profFilter = document.getElementById('sub-profile-filter').value;
+      const listEl = document.getElementById('subscribers-list');
+
+      const filtered = state.subscribers.filter(s => {
+        if (q && !(s.name.toLowerCase().includes(q) || s.username.toLowerCase().includes(q) || (s.phone || '').includes(q))) return false;
+        if (profFilter !== 'all' && s.profile !== profFilter) return false;
+        if (state.subFilter === 'active' && !s.enabled) return false;
+        if (state.subFilter === 'disabled' && s.enabled) return false;
+        if (state.subFilter === 'debt' && s.balance >= 0) return false;
+        if (state.subFilter === 'credit' && s.balance <= 0) return false;
+        return true;
+      });
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class="col-span-full bg-white rounded-2xl p-8 text-center text-slate-400 text-sm border border-slate-200">لا يوجد مشتركون مطابقون للبحث الحالي.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(s => {
+        const price = getProfilePrice(s.profile);
+        const balBadge = s.balance < 0
+          ? `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-50 text-rose-700 border border-rose-200 num-font">عليه ${formatMoney(Math.abs(s.balance))}</span>`
+          : s.balance > 0
+            ? `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 num-font">له ${formatMoney(s.balance)}</span>`
+            : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">خالص $0</span>`;
+
+        const statusBadge = s.enabled
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>فعّال</span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>موقوف</span>`;
+
+        return `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-col justify-between gap-3 hover:border-blue-300 transition">
+            <div class="space-y-2.5">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-extrabold text-slate-800 truncate">${s.name}</h3>
+                    ${statusBadge}
+                  </div>
+                  <div class="text-xs text-slate-500 num-font mt-0.5" dir="ltr">@${s.username} • ${s.phone || 'بدون هاتف'}</div>
+                </div>
+                ${balBadge}
+              </div>
+
+              <div class="flex items-center justify-between text-xs bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
+                <span class="font-bold text-blue-700 num-font">${s.profile} ($${price})</span>
+                <span class="text-slate-600">ينتهي: <strong class="num-font text-slate-800">${formatMonthShort(s.expiryMonth)}</strong></span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5 pt-1 border-t border-slate-100">
+              <button onclick="openRenewModal('${s.id}')" class="col-span-2 py-2 px-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 transition">
+                <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i> تجديد شهور
+              </button>
+              <button onclick="openLedgerModal('${s.id}')" class="py-2 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold inline-flex items-center justify-center gap-1 transition" title="كشف الحساب والدفعات">
+                <i data-lucide="receipt" class="w-3.5 h-3.5"></i> كشف
+              </button>
+              <button onclick="toggleSubscriberStatus('${s.id}')" class="py-2 px-2 rounded-xl ${s.enabled ? 'bg-rose-50 hover:bg-rose-100 text-rose-700' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'} text-xs font-bold inline-flex items-center justify-center gap-1 transition" title="تفعيل/إيقاف في ميكروتك">
+                <i data-lucide="power" class="w-3.5 h-3.5"></i> ${s.enabled ? 'إيقاف' : 'تفعيل'}
+              </button>
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-0.5">
+              <button onclick="copyWhatsAppReminder('${s.id}')" class="text-emerald-700 hover:underline font-bold inline-flex items-center gap-1">
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> نسخ تذكير واتساب
+              </button>
+              <button onclick="openEditSubscriberModal('${s.id}')" class="text-slate-500 hover:text-slate-800 font-bold inline-flex items-center gap-1">
+                <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i> تعديل / باقة
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function toggleSubscriberStatus(subId) {
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+      s.enabled = !s.enabled;
+      s.online = s.enabled;
+      saveState();
+      renderAll();
+      showToast(s.enabled ? `تم تفعيل حساب ${s.name} في ميكروتك` : `تم إيقاف حساب ${s.name} وقطع الاتصال`, s.enabled ? 'success' : 'info');
+    }
+
+    function copyWhatsAppReminder(subId) {
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+      const balText = s.balance < 0
+        ? `الذمة المستحقة (عليه): ${formatMoney(Math.abs(s.balance))}`
+        : s.balance > 0
+          ? `الرصيد المسبق (له): ${formatMoney(s.balance)}`
+          : 'الحساب خالص ($0)';
+      const msg = `مرحباً ${s.name}،\nتذكير من شبكة العليوي نت:\nحساب: ${s.username} | الباقة: ${s.profile}\nنهاية الاشتراك: ${formatMonthShort(s.expiryMonth)}\n${balText}\nشكراً لتعاونكم.`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).then(() => showToast('تم نسخ رسالة تذكير واتساب')).catch(() => fallbackCopy(msg));
+      } else {
+        fallbackCopy(msg);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      showToast('تم نسخ رسالة تذكير واتساب');
+    }
+
+    // ---- Multi-Month Future Renewal Engine ----
+    function openRenewModal(subId) {
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+      document.getElementById('renew-sub-id').value = s.id;
+      document.getElementById('renew-sub-title').textContent = `${s.name} (@${s.username}) — ينتهي حالياً: ${formatMonthShort(s.expiryMonth)}`;
+      document.getElementById('renew-base-month').value = state.selectedMonth || CURRENT_SYSTEM_MONTH;
+      document.getElementById('renew-profile-select').value = s.profile;
+      document.getElementById('renew-months-count').value = 2;
+      document.getElementById('renew-note').value = '';
+      document.querySelector('input[name="renew-start-mode"][value="future"]').checked = true;
+      updateRenewPreview();
+      openModal('modal-renew');
+    }
+
+    function setRenewMonths(n) {
+      document.getElementById('renew-months-count').value = n;
+      updateRenewPreview();
+    }
+
+    function computeRenewMonthsList() {
+      const baseMonth = document.getElementById('renew-base-month').value || CURRENT_SYSTEM_MONTH;
+      const count = Math.max(1, Math.min(24, parseInt(document.getElementById('renew-months-count').value, 10) || 1));
+      const mode = document.querySelector('input[name="renew-start-mode"]:checked').value;
+      const startOffset = mode === 'future' ? 1 : 0;
+      const months = [];
+      for (let i = 0; i < count; i++) {
+        months.push(addMonths(baseMonth, startOffset + i));
+      }
+      return months;
+    }
+
+    function updateRenewPreview() {
+      const months = computeRenewMonthsList();
+      const profileName = document.getElementById('renew-profile-select').value;
+      const unitPrice = getProfilePrice(profileName);
+      const total = months.length * unitPrice;
+
+      document.getElementById('renew-total-badge').textContent = formatMoney(total);
+      document.getElementById('renew-paid-amount').value = total;
+
+      const previewEl = document.getElementById('renew-months-preview');
+      previewEl.innerHTML = months.map(m => {
+        const isFut = m > CURRENT_SYSTEM_MONTH;
+        return `
+          <div class="px-2.5 py-1.5 rounded-lg ${isFut ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-blue-50 border border-blue-200 text-blue-800'} text-xs font-bold flex items-center gap-1.5">
+            <span>دفعة عن ${formatMonthShort(m)}</span>
+            <span class="num-font font-extrabold">${formatMoney(unitPrice)}</span>
+          </div>
+        `;
+      }).join('');
+
+      updateRenewDiffNote();
+    }
+
+    function updateRenewDiffNote() {
+      const months = computeRenewMonthsList();
+      const unitPrice = getProfilePrice(document.getElementById('renew-profile-select').value);
+      const total = months.length * unitPrice;
+      const paid = parseFloat(document.getElementById('renew-paid-amount').value) || 0;
+      const noteEl = document.getElementById('renew-diff-note');
+
+      if (paid === total) {
+        noteEl.className = 'text-xs font-bold text-emerald-700';
+        noteEl.textContent = `تسديد كامل: سيتم إضافة ${months.length} دفعات شهرية مستقلة وتمديد الاشتراك حتى نهاية ${formatMonthShort(months[months.length - 1])}.`;
+      } else if (paid < total) {
+        const rem = total - paid;
+        noteEl.className = 'text-xs font-bold text-rose-600';
+        noteEl.textContent = `دفع جزئي: سيتم قيد المتبقي (${formatMoney(rem)}) كذمة (عليه) في حساب المشترك.`;
+      } else {
+        const extra = paid - total;
+        noteEl.className = 'text-xs font-bold text-blue-700';
+        noteEl.textContent = `دفع زائد: سيتم إضافة الفائض (${formatMoney(extra)}) كرصيد إضافي (له).`;
+      }
+    }
+
+    function confirmRenewal() {
+      const subId = document.getElementById('renew-sub-id').value;
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+
+      const months = computeRenewMonthsList();
+      const profileName = document.getElementById('renew-profile-select').value;
+      const unitPrice = getProfilePrice(profileName);
+      const total = months.length * unitPrice;
+      const paid = Math.max(0, parseFloat(document.getElementById('renew-paid-amount').value) || 0);
+      const customNote = document.getElementById('renew-note').value.trim();
+      const today = getTodayISO();
+
+      s.profile = profileName;
+      s.enabled = true;
+      s.online = true;
+
+      let remainingPaid = paid;
+      months.forEach((m, idx) => {
+        const isFut = m > CURRENT_SYSTEM_MONTH;
+        const paidForThisMonth = Math.min(unitPrice, remainingPaid);
+        remainingPaid = Math.max(0, remainingPaid - paidForThisMonth);
+        const unpaidForThisMonth = unitPrice - paidForThisMonth;
+
+        if (paidForThisMonth > 0) {
+          state.transactions.unshift({
+            id: 't_' + Date.now() + '_' + idx + 'c',
+            subId: s.id,
+            date: today,
+            forMonth: m,
+            type: 'credit',
+            amount: paidForThisMonth,
+            isFuture: isFut,
+            note: customNote
+              ? `${customNote} — دفعة عن ${formatMonthShort(m)}`
+              : `${isFut ? 'تجديد مستقبلي' : 'تجديد اشتراك'} — دفعة عن ${formatMonthShort(m)}`
+          });
+          if (isFut) {
+            s.balance = Number((s.balance + paidForThisMonth).toFixed(2));
+          }
+        }
+
+        if (unpaidForThisMonth > 0) {
+          state.transactions.unshift({
+            id: 't_' + Date.now() + '_' + idx + 'd',
+            subId: s.id,
+            date: today,
+            forMonth: m,
+            type: 'debit',
+            amount: unpaidForThisMonth,
+            isFuture: isFut,
+            note: `متبقي ذمة تجديد عن ${formatMonthShort(m)} (عليه)`
+          });
+          s.balance = Number((s.balance - unpaidForThisMonth).toFixed(2));
+        }
+      });
+
+      if (remainingPaid > 0) {
+        state.transactions.unshift({
+          id: 't_' + Date.now() + '_extra',
+          subId: s.id,
+          date: today,
+          forMonth: months[months.length - 1],
+          type: 'credit',
+          amount: remainingPaid,
+          isFuture: true,
+          note: 'رصيد فائض مضاف لحساب المشترك (له)'
+        });
+        s.balance = Number((s.balance + remainingPaid).toFixed(2));
+      }
+
+      const lastMonth = months[months.length - 1];
+      if (!s.expiryMonth || lastMonth > s.expiryMonth) {
+        s.expiryMonth = lastMonth;
+      }
+
+      saveState();
+      closeModal('modal-renew');
+      renderAll();
+      showToast(`تم تجديد ${s.name} وإضافة ${months.length} دفعات (${months.map(formatMonthShort).join(' + ')})`);
+    }
+
+    // ---- Ledger Modal (له / عليه) ----
+    function openLedgerModal(subId) {
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+      document.getElementById('ledger-sub-id').value = s.id;
+      document.getElementById('ledger-sub-title').textContent = `${s.name} (@${s.username}) — الباقة: ${s.profile}`;
+      document.getElementById('ledger-tx-amount').value = '';
+      document.getElementById('ledger-tx-note').value = '';
+      document.getElementById('ledger-tx-month').value = state.selectedMonth || CURRENT_SYSTEM_MONTH;
+
+      renderLedgerModalBody(s);
+      openModal('modal-ledger');
+    }
+
+    function renderLedgerModalBody(s) {
+      const strip = document.getElementById('ledger-balance-strip');
+      if (s.balance < 0) {
+        strip.className = 'p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between';
+        strip.innerHTML = `<span class="text-xs font-extrabold text-rose-800">الرصيد الحالي: عليه ذمة مستحقة</span><span class="text-lg font-extrabold text-rose-700 num-font">${formatMoney(Math.abs(s.balance))}</span>`;
+      } else if (s.balance > 0) {
+        strip.className = 'p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between';
+        strip.innerHTML = `<span class="text-xs font-extrabold text-emerald-800">الرصيد الحالي: له رصيد مسبق / مستقبلي</span><span class="text-lg font-extrabold text-emerald-700 num-font">${formatMoney(s.balance)}</span>`;
+      } else {
+        strip.className = 'p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between';
+        strip.innerHTML = `<span class="text-xs font-extrabold text-slate-700">الرصيد الحالي: الحساب خالص ومتوازن</span><span class="text-lg font-extrabold text-slate-700 num-font">$0</span>`;
+      }
+
+      const txs = state.transactions.filter(t => t.subId === s.id);
+      const tbody = document.getElementById('ledger-history-tbody');
+      if (!txs.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-5 text-center text-slate-400">لا توجد حركات مالية مسجلة</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = txs.map(t => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-2.5 px-3 num-font text-slate-600">${t.date}</td>
+          <td class="py-2.5 px-3 font-bold ${t.isFuture ? 'text-emerald-700' : 'text-slate-700'}">${formatMonthShort(t.forMonth)}</td>
+          <td class="py-2.5 px-3 text-slate-700">${t.note}</td>
+          <td class="py-2.5 px-3 num-font font-bold text-emerald-700">${t.type === 'credit' ? formatMoney(t.amount) : '-'}</td>
+          <td class="py-2.5 px-3 num-font font-bold text-rose-600">${t.type === 'debit' ? formatMoney(t.amount) : '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function submitQuickLedgerTx() {
+      const subId = document.getElementById('ledger-sub-id').value;
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+
+      const type = document.getElementById('ledger-tx-type').value;
+      const amount = parseFloat(document.getElementById('ledger-tx-amount').value);
+      const forMonth = document.getElementById('ledger-tx-month').value || CURRENT_SYSTEM_MONTH;
+      const note = document.getElementById('ledger-tx-note').value.trim() || (type === 'credit' ? 'سداد دفعة نقدية (له)' : 'قيد دين / رسوم إضافية (عليه)');
+
+      if (!amount || amount <= 0) {
+        showToast('يرجى إدخال مبلغ صحيح أكبر من صفر', 'error');
+        return;
+      }
+
+      state.transactions.unshift({
+        id: 't_' + Date.now(),
+        subId: s.id,
+        date: getTodayISO(),
+        forMonth,
+        type,
+        amount,
+        isFuture: forMonth > CURRENT_SYSTEM_MONTH,
+        note
+      });
+
+      s.balance = Number((s.balance + (type === 'credit' ? amount : -amount)).toFixed(2));
+      saveState();
+      renderLedgerModalBody(s);
+      renderAll();
+      document.getElementById('ledger-tx-amount').value = '';
+      document.getElementById('ledger-tx-note').value = '';
+      showToast('تم تسجيل الحركة المالية وتحديث الرصيد');
+    }
+
+    // ---- Payments & Future Months Tab ----
+    function setPaymentFilter(f) {
+      state.payFilter = f;
+      document.querySelectorAll('.pay-filter-btn').forEach(btn => {
+        const isAct = btn.dataset.pfilter === f;
+        btn.classList.toggle('bg-slate-900', isAct);
+        btn.classList.toggle('text-white', isAct);
+        btn.classList.toggle('bg-slate-100', !isAct);
+        btn.classList.toggle('text-slate-700', !isAct);
+      });
+      renderPayments();
+    }
+
+    function renderPayments() {
+      const futPanel = document.getElementById('future-months-panel');
+      const tblPanel = document.getElementById('payments-table-panel');
+      const tbody = document.getElementById('payments-tbody');
+
+      const getSubName = id => {
+        const s = state.subscribers.find(x => x.id === id);
+        return s ? `${s.name} (@${s.username})` : 'مشترك محذوف';
+      };
+
+      if (state.payFilter === 'future') {
+        futPanel.classList.remove('hidden');
+        tblPanel.classList.add('hidden');
+        const grouped = {};
+        state.transactions
+          .filter(t => t.type === 'credit' && t.forMonth > CURRENT_SYSTEM_MONTH)
+          .forEach(t => {
+            if (!grouped[t.forMonth]) grouped[t.forMonth] = [];
+            grouped[t.forMonth].push(t);
+          });
+        const months = Object.keys(grouped).sort();
+        if (!months.length) {
+          futPanel.innerHTML = `<div class="bg-white rounded-2xl p-8 text-center text-slate-400 text-sm border border-slate-200">لا توجد دفعات مستقبلية مجدولة حالياً.</div>`;
+          return;
+        }
+        futPanel.innerHTML = months.map(m => {
+          const items = grouped[m];
+          const sum = items.reduce((a, b) => a + Number(b.amount), 0);
+          return `
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+              <div class="bg-emerald-50/80 px-4 py-3 border-b border-emerald-100 flex items-center justify-between">
+                <div class="font-extrabold text-sm text-emerald-900">دفعات ${formatMonthArabic(m)}</div>
+                <div class="text-sm font-extrabold text-emerald-700 num-font">${formatMoney(sum)} (${items.length} دفعة)</div>
+              </div>
+              <div class="divide-y divide-slate-100">
+                ${items.map(t => `
+                  <div class="px-4 py-3 flex items-center justify-between gap-2 text-xs">
+                    <div>
+                      <div class="font-bold text-slate-800">${getSubName(t.subId)}</div>
+                      <div class="text-slate-500 mt-0.5">${t.note} • تاريخ الدفع: <span class="num-font">${t.date}</span></div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-extrabold num-font">${formatMoney(t.amount)}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      futPanel.classList.add('hidden');
+      tblPanel.classList.remove('hidden');
+
+      const filtered = state.transactions.filter(t => {
+        if (state.payFilter === 'credit') return t.type === 'credit';
+        if (state.payFilter === 'debit') return t.type === 'debit';
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map(t => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-3 px-4 num-font text-xs text-slate-600 whitespace-nowrap">${t.date}</td>
+          <td class="py-3 px-4 font-bold text-slate-800 text-xs">${getSubName(t.subId)}</td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded-md text-xs font-bold ${t.isFuture ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-700'}">
+              ${formatMonthShort(t.forMonth)} ${t.isFuture ? '• مستقبلي' : ''}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-xs text-slate-600">${t.note}</td>
+          <td class="py-3 px-4 num-font font-extrabold text-emerald-700 text-xs">${t.type === 'credit' ? formatMoney(t.amount) : '-'}</td>
+          <td class="py-3 px-4 num-font font-extrabold text-rose-600 text-xs">${t.type === 'debit' ? formatMoney(t.amount) : '-'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ---- Add / Edit Subscriber ----
+    function openAddSubscriberModal() {
+      document.getElementById('sub-modal-heading').textContent = 'إضافة مشترك جديد';
+      document.getElementById('edit-sub-id').value = '';
+      document.getElementById('edit-sub-name').value = '';
+      document.getElementById('edit-sub-user').value = '';
+      document.getElementById('edit-sub-phone').value = '';
+      document.getElementById('edit-sub-expiry').value = state.selectedMonth || CURRENT_SYSTEM_MONTH;
+      document.getElementById('btn-delete-sub').classList.add('hidden');
+      openModal('modal-subscriber');
+    }
+
+    function openEditSubscriberModal(subId) {
+      const s = state.subscribers.find(x => x.id === subId);
+      if (!s) return;
+      document.getElementById('sub-modal-heading').textContent = 'تعديل بيانات المشترك والباقة';
+      document.getElementById('edit-sub-id').value = s.id;
+      document.getElementById('edit-sub-name').value = s.name;
+      document.getElementById('edit-sub-user').value = s.username;
+      document.getElementById('edit-sub-phone').value = s.phone || '';
+      document.getElementById('edit-sub-profile').value = s.profile;
+      document.getElementById('edit-sub-expiry').value = s.expiryMonth;
+      document.getElementById('btn-delete-sub').classList.remove('hidden');
+      openModal('modal-subscriber');
+    }
+
+    function saveSubscriberForm() {
+      const id = document.getElementById('edit-sub-id').value;
+      const name = document.getElementById('edit-sub-name').value.trim();
+      const username = document.getElementById('edit-sub-user').value.trim();
+      const phone = document.getElementById('edit-sub-phone').value.trim();
+      const profile = document.getElementById('edit-sub-profile').value;
+      const expiryMonth = document.getElementById('edit-sub-expiry').value || CURRENT_SYSTEM_MONTH;
+
+      if (!name || !username) {
+        showToast('يرجى إدخال اسم المشترك وحساب PPPoE', 'error');
+        return;
+      }
+
+      if (id) {
+        const s = state.subscribers.find(x => x.id === id);
+        if (s) {
+          s.name = name;
+          s.username = username;
+          s.phone = phone;
+          s.profile = profile;
+          s.expiryMonth = expiryMonth;
+        }
+        showToast('تم تحديث بيانات المشترك');
+      } else {
+        state.subscribers.unshift({
+          id: 's_' + Date.now(),
+          name, username, phone, profile,
+          enabled: true, online: true, expiryMonth, balance: 0
+        });
+        showToast('تمت إضافة المشترك الجديد بنجاح');
+      }
+      saveState();
+      closeModal('modal-subscriber');
+      renderAll();
+    }
+
+    function deleteEditingSubscriber() {
+      const id = document.getElementById('edit-sub-id').value;
+      if (!id) return;
+      state.subscribers = state.subscribers.filter(s => s.id !== id);
+      saveState();
+      closeModal('modal-subscriber');
+      renderAll();
+      showToast('تم حذف المشترك من القائمة', 'info');
+    }
+
+    // ---- MikroTik Sync & Profiles ----
+    function saveMikrotikSettings() {
+      state.mikrotik = {
+        host: document.getElementById('mk-host').value.trim() || '192.168.88.1',
+        port: parseInt(document.getElementById('mk-port').value, 10) || 443,
+        user: document.getElementById('mk-user').value.trim() || 'admin'
+      };
+      saveState();
+      showToast('تم حفظ إعدادات اتصال ميكروتك');
+    }
+
+    function simulateMikrotikPull() {
+      const host = document.getElementById('mk-host').value.trim() || '192.168.88.1';
+      const demoPulled = [
+        { name: 'رامي السالم', username: 'rami_8m', phone: '0933881122', profile: '8M-Plus', enabled: true },
+        { name: 'نور الدين حمد', username: 'nour_16m', phone: '0944772233', profile: '16M-Turbo', enabled: true },
+        { name: 'باسل الخطيب', username: 'basel_4m', phone: '0955663344', profile: '4M-Home', enabled: false }
+      ];
+
+      let added = 0;
+      demoPulled.forEach(item => {
+        if (!state.subscribers.some(s => s.username === item.username)) {
+          state.subscribers.unshift({
+            id: 's_mk_' + Date.now() + '_' + added,
+            name: item.name,
+            username: item.username,
+            phone: item.phone,
+            profile: item.profile,
+            enabled: item.enabled,
+            online: item.enabled,
+            expiryMonth: CURRENT_SYSTEM_MONTH,
+            balance: 0
+          });
+          added++;
+        }
+      });
+
+      const logBox = document.getElementById('sync-log-box');
+      logBox.classList.remove('hidden');
+      logBox.innerHTML = [
+        `[RouterOS v7 REST] GET https://${host}/rest/ppp/secret`,
+        `[OK] Fetched ${demoPulled.length} PPPoE secrets & ${state.profiles.length} profiles`,
+        `[SYNC] Added ${added} new subscriber(s), skipped ${demoPulled.length - added} existing.`
+      ].join('<br>');
+
+      saveState();
+      renderAll();
+      showToast(added > 0 ? `تم سحب ${added} حسابات جديدة من ميكروتك` : 'جميع الحسابات متزامنة بالفعل');
+    }
+
+    function importFromMikrotikRSC() {
+      const text = document.getElementById('rsc-import-text').value.trim();
+      if (!text) {
+        showToast('يرجى لصق نص تصدير ميكروتك أولاً', 'error');
+        return;
+      }
+
+      const lines = text.split(/\r?\n/);
+      let count = 0;
+      lines.forEach((line, idx) => {
+        const nameMatch = line.match(/name="?([^\s"]+)"?/);
+        if (!nameMatch) return;
+        const username = nameMatch[1];
+        if (state.subscribers.some(s => s.username === username)) return;
+
+        const profMatch = line.match(/profile="?([^\s"]+)"?/);
+        const commentMatch = line.match(/comment="([^"]+)"/);
+        const disabledMatch = line.match(/disabled=(yes|true)/i);
+
+        let profile = profMatch ? profMatch[1] : state.profiles[0].name;
+        if (!state.profiles.some(p => p.name === profile)) {
+          state.profiles.push({ name: profile, speed: 'Custom', price: 15 });
+        }
+
+        const displayName = commentMatch ? commentMatch[1] : username;
+        state.subscribers.unshift({
+          id: 's_rsc_' + Date.now() + '_' + idx,
+          name: displayName,
+          username,
+          phone: '',
+          profile,
+          enabled: !disabledMatch,
+          online: !disabledMatch,
+          expiryMonth: CURRENT_SYSTEM_MONTH,
+          balance: 0
+        });
+        count++;
+      });
+
+      saveState();
+      renderAll();
+      showToast(count > 0 ? `تم استيراد ${count} حساباً من ملف ميكروتك` : 'لم يتم العثور على حسابات جديدة صالحة', count > 0 ? 'success' : 'info');
+    }
+
+    function renderProfiles() {
+      const grid = document.getElementById('profiles-grid');
+      grid.innerHTML = state.profiles.map((p, idx) => {
+        const count = state.subscribers.filter(s => s.profile === p.name).length;
+        return `
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-extrabold text-sm text-slate-800 num-font">${p.name}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">${count} مشترك</span>
+            </div>
+            <div class="text-xs text-slate-500 num-font">السرعة: ${p.speed}</div>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="text-xs font-bold text-slate-600">السعر ($):</span>
+              <input type="number" min="1" step="0.5" value="${p.price}" onchange="updateProfilePrice(${idx}, this.value)" class="w-20 px-2 py-1 rounded-lg border border-slate-300 bg-white text-xs font-extrabold num-font text-emerald-700">
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateProfilePrice(idx, val) {
+      const price = parseFloat(val);
+      if (!price || price <= 0) return;
+      state.profiles[idx].price = price;
+      saveState();
+      renderAll();
+      showToast('تم تحديث سعر الباقة');
+    }
+
+    function openAddProfileModal() {
+      document.getElementById('new-prof-name').value = '';
+      document.getElementById('new-prof-speed').value = '';
+      document.getElementById('new-prof-price').value = '';
+      openModal('modal-profile');
+    }
+
+    function saveNewProfile() {
+      const name = document.getElementById('new-prof-name').value.trim();
+      const speed = document.getElementById('new-prof-speed').value.trim() || '10M/10M';
+      const price = parseFloat(document.getElementById('new-prof-price').value);
+      if (!name || !price || price <= 0) {
+        showToast('يرجى إدخال اسم الباقة والسعر', 'error');
+        return;
+      }
+      state.profiles.push({ name, speed, price });
+      saveState();
+      closeModal('modal-profile');
+      renderAll();
+      showToast('تمت إضافة الباقة بنجاح');
+    }
+
+    // ---- Accounting & Backup ----
+    function renderAccounting() {
+      const cash = state.transactions.filter(t => t.type === 'credit').reduce((s, t) => s + Number(t.amount), 0);
+      const receivables = state.subscribers.filter(s => s.balance < 0).reduce((s, x) => s + Math.abs(x.balance), 0);
+      const deferred = state.transactions.filter(t => t.type === 'credit' && t.forMonth > CURRENT_SYSTEM_MONTH).reduce((s, t) => s + Number(t.amount), 0);
+
+      document.getElementById('acc-total-cash').textContent = formatMoney(cash);
+      document.getElementById('acc-total-receivables').textContent = formatMoney(receivables);
+      document.getElementById('acc-total-deferred').textContent = formatMoney(deferred);
+    }
+
+    function exportPaymentsCSV() {
+      const headers = ['Date', 'Subscriber', 'Username', 'AllocatedMonth', 'IsFuture', 'Type', 'Amount', 'Note'];
+      const rows = state.transactions.map(t => {
+        const s = state.subscribers.find(x => x.id === t.subId) || { name: '-', username: '-' };
+        return [t.date, s.name, s.username, t.forMonth, t.isFuture ? 'Future' : 'Current', t.type === 'credit' ? 'Credit(له)' : 'Debit(عليه)', t.amount, t.note]
+          .map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+      });
+      const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      downloadBlob(csv, `alolowi_payments_${state.selectedMonth}.csv`, 'text/csv;charset=utf-8;');
+      showToast('تم تصدير سجل الدفعات بصيغة CSV');
+    }
+
+    function exportFullBackupJSON() {
+      downloadBlob(JSON.stringify(state, null, 2), `alolowi_backup_${getTodayISO()}.json`, 'application/json');
+      showToast('تم تنزيل النسخة الاحتياطية بنجاح');
+    }
+
+    function importFullBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.subscribers) && Array.isArray(parsed.transactions)) {
+            state = parsed;
+            saveState();
+            renderAll();
+            showToast('تمت استعادة النسخة الاحتياطية بنجاح');
+          } else {
+            showToast('ملف النسخة الاحتياطية غير صالح', 'error');
+          }
+        } catch (err) {
+          showToast('تعذر قراءة ملف JSON', 'error');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function openResetConfirmModal() {
+      openModal('modal-reset');
+    }
+
+    function confirmResetDemoData() {
+      state = getDefaultState();
+      saveState();
+      closeModal('modal-reset');
+      renderAll();
+      showToast('تمت إعادة ضبط البيانات التجريبية', 'info');
+    }
+
+    function downloadBlob(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function renderAll() {
+      populateProfileDropdowns();
+      renderDashboard();
+      renderSubscribers();
+      renderPayments();
+      renderProfiles();
+      renderAccounting();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('mk-host').value = state.mikrotik.host || '192.168.88.1';
+      document.getElementById('mk-port').value = state.mikrotik.port || 443;
+      document.getElementById('mk-user').value = state.mikrotik.user || 'admin';
+      switchTab('dashboard');
+    });
+  </script>
+</body>
+</html>
